@@ -1,5 +1,5 @@
 import React from 'react'
-import CustomerOrder from '../components/customerOrder'
+import CustomerOrder from "../components/CustomerOrder"
 
 const Orders = () => {
   return (
