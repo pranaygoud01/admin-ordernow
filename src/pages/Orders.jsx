@@ -4,7 +4,7 @@ import CustomerOrder from '../components/customerOrder'
 const Orders = () => {
   return (
     <div className='w-full h-[100vh] flex justify-center'>
-        <div className='max-w-[1400px] w-full mt-4'>
+        <div className='max-w-[1400px] p-5 w-full mt-4'>
         <h1 className='font-bold  text-2xl'>
             Orders 
         </h1>

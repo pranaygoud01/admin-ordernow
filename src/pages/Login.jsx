@@ -3,7 +3,7 @@ import {Link} from "@tanstack/react-router"
 const Login = () => {
   return (
     <div className='w-full h-[100vh] flex justify-center items-center '>
-        <div className='w-3/12 h-fit p-10 bg-white shadow-xl rounded-xl'>
+        <div className='w-3/12 h-fit max-lg:w-11/12 max-lg:px-8 p-10 bg-white shadow-xl rounded-xl'>
             <h1 className='font-semibold text-xl'>Login</h1>
             <div className='flex flex-col gap-8'>
               <div className='flex flex-col gap-1 mt-8'>

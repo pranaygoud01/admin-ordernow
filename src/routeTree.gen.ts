@@ -11,14 +11,35 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as PromocodeImport } from './routes/promocode'
+import { Route as ProductImport } from './routes/product'
 import { Route as OrdersImport } from './routes/orders'
+import { Route as AdditemImport } from './routes/additem'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
+const PromocodeRoute = PromocodeImport.update({
+  id: '/promocode',
+  path: '/promocode',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProductRoute = ProductImport.update({
+  id: '/product',
+  path: '/product',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const OrdersRoute = OrdersImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdditemRoute = AdditemImport.update({
+  id: '/additem',
+  path: '/additem',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -39,11 +60,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/additem': {
+      id: '/additem'
+      path: '/additem'
+      fullPath: '/additem'
+      preLoaderRoute: typeof AdditemImport
+      parentRoute: typeof rootRoute
+    }
     '/orders': {
       id: '/orders'
       path: '/orders'
       fullPath: '/orders'
       preLoaderRoute: typeof OrdersImport
+      parentRoute: typeof rootRoute
+    }
+    '/product': {
+      id: '/product'
+      path: '/product'
+      fullPath: '/product'
+      preLoaderRoute: typeof ProductImport
+      parentRoute: typeof rootRoute
+    }
+    '/promocode': {
+      id: '/promocode'
+      path: '/promocode'
+      fullPath: '/promocode'
+      preLoaderRoute: typeof PromocodeImport
       parentRoute: typeof rootRoute
     }
   }
@@ -53,37 +95,52 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/additem': typeof AdditemRoute
   '/orders': typeof OrdersRoute
+  '/product': typeof ProductRoute
+  '/promocode': typeof PromocodeRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/additem': typeof AdditemRoute
   '/orders': typeof OrdersRoute
+  '/product': typeof ProductRoute
+  '/promocode': typeof PromocodeRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/additem': typeof AdditemRoute
   '/orders': typeof OrdersRoute
+  '/product': typeof ProductRoute
+  '/promocode': typeof PromocodeRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/orders'
+  fullPaths: '/' | '/additem' | '/orders' | '/product' | '/promocode'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/orders'
-  id: '__root__' | '/' | '/orders'
+  to: '/' | '/additem' | '/orders' | '/product' | '/promocode'
+  id: '__root__' | '/' | '/additem' | '/orders' | '/product' | '/promocode'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdditemRoute: typeof AdditemRoute
   OrdersRoute: typeof OrdersRoute
+  ProductRoute: typeof ProductRoute
+  PromocodeRoute: typeof PromocodeRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdditemRoute: AdditemRoute,
   OrdersRoute: OrdersRoute,
+  ProductRoute: ProductRoute,
+  PromocodeRoute: PromocodeRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,14 +154,26 @@ export const routeTree = rootRoute
       "filePath": "__root.jsx",
       "children": [
         "/",
-        "/orders"
+        "/additem",
+        "/orders",
+        "/product",
+        "/promocode"
       ]
     },
     "/": {
       "filePath": "index.jsx"
     },
+    "/additem": {
+      "filePath": "additem.jsx"
+    },
     "/orders": {
       "filePath": "orders.jsx"
+    },
+    "/product": {
+      "filePath": "product.jsx"
+    },
+    "/promocode": {
+      "filePath": "promocode.jsx"
     }
   }
 }
