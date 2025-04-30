@@ -22,7 +22,7 @@ const NavBar = () => {
           {menu.map((item, index) => (
             <Link to={item.path} key={index}>{item.name}</Link>
           ))}
-          <button className='font-semibold text-white px-4 py-2 ml-5 rounded-full bg-black'>Logout</button>
+          <Link to="/" className='font-semibold text-white px-4 py-2 ml-5 rounded-full bg-black'>Logout</Link>
         </div>
 
         {/* Mobile Menu Icon */}
@@ -39,7 +39,7 @@ const NavBar = () => {
           {menu.map((item, index) => (
             <Link to={item.path} key={index} onClick={() => setIsOpen(false)}>{item.name}</Link>
           ))}
-          <Link to="/" className='font-semibold text-white px-4 py-2 rounded-full bg-black'>Logout</Link>
+          <Link to="/" className='font-semibold  text-white px-4 py-2 rounded-full bg-black'>Logout</Link>
         </div>
       )}
     </div>

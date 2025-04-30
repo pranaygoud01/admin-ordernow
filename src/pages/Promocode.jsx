@@ -9,9 +9,9 @@ const formatDate = (date) =>
 
 const Promocode = () => {
   const [promoCodes, setPromoCodes] = useState([]);
-  const [createdAt, setCreatedAt] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [numCodes, setNumCodes] = useState(1);
+  const [discount, setDiscount] = useState("");
 
   const generatePromoCode = (length = 10) => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -26,43 +26,32 @@ const Promocode = () => {
     new Date() > new Date(expiresAt) ? "Expired" : "Active";
 
   const handleGenerateCodes = () => {
-    if (!createdAt || !expiresAt || numCodes < 1) {
+    if (!expiresAt || !discount || numCodes < 1) {
       alert("Fill all fields correctly.");
       return;
     }
 
     const newCodes = Array.from({ length: numCodes }, () => ({
       code: generatePromoCode(),
-      createdAt: new Date(createdAt),
       expiresAt: new Date(expiresAt),
+      discount: `${discount}%`,
     }));
 
     setPromoCodes((prev) => [...newCodes, ...prev]);
-    setCreatedAt("");
     setExpiresAt("");
+    setDiscount("");
     setNumCodes(1);
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-10">
-         Promo Code Generator
+        Promo Code Generator
       </h1>
 
       {/* Form Section */}
-      <div className="bg-gradient-to-br from-blue-100 to-white p-8 rounded-xl shadow-lg mb-10">
+      <div className="bg-white p-8 rounded-xl shadow-lg mb-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Creation Date
-            </label>
-            <input
-              type="date"
-              value={createdAt}
-              onChange={(e) => setCreatedAt(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Expiry Date
@@ -84,6 +73,20 @@ const Promocode = () => {
               value={numCodes}
               onChange={(e) => setNumCodes(Number(e.target.value))}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Discount (%)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={discount}
+              onChange={(e) => setDiscount(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-400"
+              placeholder="e.g. 15"
             />
           </div>
           <div className="flex items-end">
@@ -110,7 +113,7 @@ const Promocode = () => {
                   {promo.code}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Created: {formatDate(promo.createdAt)}
+                  Discount: {promo.discount}
                 </p>
                 <p className="text-sm text-gray-600 mb-2">
                   Expires: {formatDate(promo.expiresAt)}
