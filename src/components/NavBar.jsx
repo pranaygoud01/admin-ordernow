@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { HiMenuAlt3 } from 'react-icons/hi';
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const menu = [
     { name: "Orders", path: "/orders" },
@@ -12,8 +13,13 @@ const NavBar = () => {
     { name: "Products", path: "/product" },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    navigate({ to: "/" });
+  };
+
   return (
-    <div className='w-full p-5 sticky top-0 bg-white shadow-md z-50'>
+    <div className='w-full p-5 sticky top-0 bg-white  z-50'>
       <div className='flex justify-between items-center'>
         <h1 className='font-bold text-xl'>Admin Panel</h1>
 
@@ -22,7 +28,12 @@ const NavBar = () => {
           {menu.map((item, index) => (
             <Link to={item.path} key={index}>{item.name}</Link>
           ))}
-          <Link to="/" className='font-semibold text-white px-4 py-2 ml-5 rounded-full bg-black'>Logout</Link>
+          <button
+            onClick={handleLogout}
+            className='font-semibold text-white px-4 py-2 ml-5 rounded-full bg-black'
+          >
+            Logout
+          </button>
         </div>
 
         {/* Mobile Menu Icon */}
@@ -37,9 +48,17 @@ const NavBar = () => {
       {isOpen && (
         <div className='flex flex-col mt-3 lg:hidden gap-3 text-sm font-semibold text-neutral-800'>
           {menu.map((item, index) => (
-            <Link to={item.path} key={index} onClick={() => setIsOpen(false)}>{item.name}</Link>
+            <Link to={item.path} className='text-center pt-6' key={index} onClick={() => setIsOpen(false)}>{item.name}</Link>
           ))}
-          <Link to="/" className='font-semibold  text-white px-4 py-2 rounded-full bg-black'>Logout</Link>
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              handleLogout();
+            }}
+            className='font-semibold text-center text-white px-4 py-2 rounded-full bg-black'
+          >
+            Logout
+          </button>
         </div>
       )}
     </div>
