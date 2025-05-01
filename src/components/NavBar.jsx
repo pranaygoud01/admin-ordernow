@@ -30,7 +30,7 @@ const NavBar = () => {
           ))}
           <button
             onClick={handleLogout}
-            className='font-semibold text-white px-4 py-2 ml-5 rounded-full bg-black'
+            className='font-semibold cursor-pointer text-white px-4 py-2 ml-5 rounded-md bg-black'
           >
             Logout
           </button>
@@ -46,7 +46,7 @@ const NavBar = () => {
 
       {/* Mobile Dropdown Menu */}
       {isOpen && (
-        <div className='flex flex-col mt-3 lg:hidden gap-3 text-sm font-semibold text-neutral-800'>
+        <div className='flex flex-col mt-3 lg:hidden gap-5 text-lg font-semibold text-neutral-800'>
           {menu.map((item, index) => (
             <Link to={item.path} className='text-center pt-6' key={index} onClick={() => setIsOpen(false)}>{item.name}</Link>
           ))}
@@ -55,7 +55,7 @@ const NavBar = () => {
               setIsOpen(false);
               handleLogout();
             }}
-            className='font-semibold text-center text-white px-4 py-2 rounded-full bg-black'
+            className='font-semibold text-center mt-2 text-white px-4 py-2 rounded-md bg-black'
           >
             Logout
           </button>

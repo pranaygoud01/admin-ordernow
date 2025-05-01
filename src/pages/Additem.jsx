@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-
+import { MdOutlineDeleteOutline } from "react-icons/md";
 const Additem = () => {
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
-  const [imageFile, setImageFile] = useState(null); // Store the selected file
-  const [uploading, setUploading] = useState(false); // Show loading indicator
+  const [imageFile, setImageFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const [newCategory, setNewCategory] = useState("");
+  const [categories, setCategories] = useState([
+    "SIDES", "CHIMICHANGA", "BURRITO/RICE", "BOWL", "SETMENU", "FAJITA",
+    "STARTERS", "KIDS MEALS", "DONBURI", "TACOS", "NIGIRI", "TEMAKI",
+    "BURGER AND CHIPS", "MAKI ROLLS", "SPECIALITY", "ROLLS", "URAMAKI", "SASHIMI"
+  ]);
 
   const authToken = localStorage.getItem('authToken');
 
@@ -31,7 +38,7 @@ const Additem = () => {
       setUploading(false);
 
       if (response.ok) {
-        return data.url;  // Assuming backend returns { url: "http://..." }
+        return data.url;
       } else {
         toast.error(data.message || "Image upload failed");
         return null;
@@ -47,16 +54,14 @@ const Additem = () => {
     e.preventDefault();
 
     const imageUrl = await handleImageUpload();
-    if (!imageUrl) {
-      return; // Stop if image upload failed
-    }
+    if (!imageUrl) return;
 
     const formData = {
       name: productName,
-      description: description,
-      price: price,
-      category: category,
-      image: imageUrl, // Use the uploaded image URL
+      description,
+      price,
+      category,
+      image: imageUrl,
     };
 
     fetch(`${import.meta.env.VITE_HOST}/api/items/add`, {
@@ -76,9 +81,32 @@ const Additem = () => {
         setImageFile(null);
         setDescription("");
       })
-      .catch((error) => {
+      .catch(() => {
         toast.error("Failed to add item");
       });
+  };
+
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim();
+    if (!trimmed) {
+      toast.error("Category cannot be empty");
+      return;
+    }
+    if (categories.includes(trimmed)) {
+      toast.error("Category already exists");
+      return;
+    }
+    setCategories([...categories, trimmed]);
+    setNewCategory("");
+    toast.success("Category added");
+  };
+
+  const handleDeleteCategory = (catToDelete) => {
+    setCategories(categories.filter(cat => cat !== catToDelete));
+    if (category === catToDelete) {
+      setCategory("");
+    }
+    toast.success("Category deleted");
   };
 
   return (
@@ -88,9 +116,7 @@ const Additem = () => {
 
         {/* Product Name */}
         <div className="mb-4">
-          <label htmlFor="product_name" className="block font-semibold mb-2">
-            Product Name
-          </label>
+          <label htmlFor="product_name" className="block font-semibold mb-2">Product Name</label>
           <input
             type="text"
             id="product_name"
@@ -103,9 +129,7 @@ const Additem = () => {
 
         {/* Description */}
         <div className="mb-4">
-          <label htmlFor="description" className="block font-semibold mb-2">
-            Description
-          </label>
+          <label htmlFor="description" className="block font-semibold mb-2">Description</label>
           <textarea
             id="description"
             value={description}
@@ -117,9 +141,7 @@ const Additem = () => {
 
         {/* Price */}
         <div className="mb-4">
-          <label htmlFor="price" className="block font-semibold mb-2">
-            Price
-          </label>
+          <label htmlFor="price" className="block font-semibold mb-2">Price</label>
           <input
             type="number"
             id="price"
@@ -131,26 +153,63 @@ const Additem = () => {
           />
         </div>
 
-        {/* Category */}
+        {/* Category Dropdown */}
         <div className="mb-4">
-          <label htmlFor="category" className="block font-semibold mb-2">
-            Category
-          </label>
-          <input
-            type="text"
+          <label htmlFor="category" className="block font-semibold mb-2">Category</label>
+          <select
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-md"
             required
-          />
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat, index) => (
+              <option key={index} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Add/Delete Category Controls */}
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="New category"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              className="flex-1 p-3 border border-gray-300 rounded-md"
+            />
+            <button
+              type="button"
+              onClick={handleAddCategory}
+              className="px-10 py-2 cursor-pointer font-semibold bg-green-600 text-white rounded-md"
+            >
+              Add
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+            {categories.map((cat, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between px-3 py-2 bg-gray-100 rounded"
+              >
+                <span className="text-sm truncate">{cat}</span>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCategory(cat)}
+                  className="text-red-600 text-xl cursor-pointer"
+                >
+                  <MdOutlineDeleteOutline/>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Image Upload */}
         <div className="mb-4">
-          <label htmlFor="imageUpload" className="block font-semibold mb-2">
-            Upload Image
-          </label>
+          <label htmlFor="imageUpload" className="block font-semibold mb-2">Upload Image</label>
           <input
             type="file"
             id="imageUpload"
@@ -161,14 +220,12 @@ const Additem = () => {
           />
         </div>
 
-        {/* Uploading Indicator */}
         {uploading && (
           <div className="text-center text-blue-500 font-semibold mb-4">
             Uploading Image...
           </div>
         )}
 
-        {/* Submit Button */}
         <div className="flex w-full mt-6 justify-center">
           <button
             type="submit"
@@ -178,7 +235,6 @@ const Additem = () => {
             {uploading ? "Please wait..." : "Add Item"}
           </button>
         </div>
-
       </form>
     </div>
   );

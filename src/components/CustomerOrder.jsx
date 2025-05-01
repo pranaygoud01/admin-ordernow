@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-
+import toast from "react-hot-toast"
 const CustomerOrder = ({ order }) => {
   const { customerName, phoneNumber, email, address, items, price, transactionId, createdAt } = order;
 
@@ -21,7 +21,7 @@ const CustomerOrder = ({ order }) => {
         },
       });
 
-      alert('Order deleted successfully');
+     toast.success('Order deleted successfully');
       window.location.reload();
       // Optionally, refresh the list or call a parent function to remove it from UI
     } catch (error) {
@@ -43,10 +43,13 @@ const CustomerOrder = ({ order }) => {
           <div className='w-full'>
             <h1 className='font-semibold'>Ordered Items</h1>
             <ul className='text-sm mt-2 flex flex-col gap-2'>
-              {items.map((item, index) => (
-                <li key={index}>{item.itemId.name}</li>
-              ))}
-            </ul>
+  {items.map((item, index) => (
+    <li key={index}>
+      {item.itemId ? item.itemId.name : <span className="text-gray-400">Unknown Item</span>}
+    </li>
+  ))}
+</ul>
+
           </div>
         </div>
         <div className='flex flex-col gap-2 items-end max-lg:items-start'>
