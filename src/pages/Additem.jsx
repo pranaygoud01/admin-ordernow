@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { MdOutlineDeleteOutline } from "react-icons/md";
-const Additem = () => {
+
+const AddItem = () => {
   const [productName, setProductName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -10,13 +11,23 @@ const Additem = () => {
   const [uploading, setUploading] = useState(false);
 
   const [newCategory, setNewCategory] = useState("");
-  const [categories, setCategories] = useState([
-    "SIDES", "CHIMICHANGA", "BURRITO/RICE", "BOWL", "SETMENU", "FAJITA",
-    "STARTERS", "KIDS MEALS", "DONBURI", "TACOS", "NIGIRI", "TEMAKI",
-    "BURGER AND CHIPS", "MAKI ROLLS", "SPECIALITY", "ROLLS", "URAMAKI", "SASHIMI"
-  ]);
+  const [categories, setCategories] = useState([]);
 
   const authToken = localStorage.getItem('authToken');
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_HOST}/api/categories`);
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      toast.error("Failed to fetch categories");
+    }
+  };
 
   const handleImageUpload = async () => {
     if (!imageFile) {
@@ -64,49 +75,87 @@ const Additem = () => {
       image: imageUrl,
     };
 
-    fetch(`${import.meta.env.VITE_HOST}/api/items/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${authToken}`,
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then(() => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_HOST}/api/items/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
         toast.success("Item Added Successfully");
         setProductName("");
         setCategory("");
         setPrice("");
         setImageFile(null);
         setDescription("");
-      })
-      .catch(() => {
-        toast.error("Failed to add item");
-      });
+      } else {
+        toast.error(data.message || "Failed to add item");
+      }
+    } catch (error) {
+      toast.error("Failed to add item");
+    }
   };
 
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     const trimmed = newCategory.trim();
     if (!trimmed) {
       toast.error("Category cannot be empty");
       return;
     }
-    if (categories.includes(trimmed)) {
-      toast.error("Category already exists");
-      return;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_HOST}/api/categories/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Category added");
+        setNewCategory("");
+        fetchCategories(); // Refresh the categories from backend
+      } else {
+        toast.error(data.message || "Failed to add category");
+      }
+    } catch (error) {
+      toast.error("Failed to add category");
     }
-    setCategories([...categories, trimmed]);
-    setNewCategory("");
-    toast.success("Category added");
   };
 
-  const handleDeleteCategory = (catToDelete) => {
-    setCategories(categories.filter(cat => cat !== catToDelete));
-    if (category === catToDelete) {
-      setCategory("");
+  const handleDeleteCategory = async (catId, catName) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_HOST}/api/categories/${catId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Category deleted");
+        setCategories(categories.filter(cat => cat._id !== catId));
+        if (category === catName) {
+          setCategory("");
+        }
+      } else {
+        toast.error(data.message || "Failed to delete category");
+      }
+    } catch (error) {
+      toast.error("Failed to delete category");
     }
-    toast.success("Category deleted");
   };
 
   return (
@@ -164,8 +213,8 @@ const Additem = () => {
             required
           >
             <option value="">Select a category</option>
-            {categories.map((cat, index) => (
-              <option key={index} value={cat}>{cat}</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>{cat.name}</option>
             ))}
           </select>
         </div>
@@ -189,18 +238,18 @@ const Additem = () => {
             </button>
           </div>
           <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-            {categories.map((cat, index) => (
+            {categories.map((cat) => (
               <div
-                key={index}
-                className="flex items-center justify-between px-3 py-2 bg-gray-100 rounded"
+                key={cat._id}
+                className="flex items-center justify-between px-3 py-2 bg-white font-semibold border border-neutral-300 rounded"
               >
-                <span className="text-sm truncate">{cat}</span>
+                <span className="text-sm truncate">{cat.name}</span>
                 <button
                   type="button"
-                  onClick={() => handleDeleteCategory(cat)}
+                  onClick={() => handleDeleteCategory(cat._id, cat.name)}
                   className="text-red-600 text-xl cursor-pointer"
                 >
-                  <MdOutlineDeleteOutline/>
+                  <MdOutlineDeleteOutline />
                 </button>
               </div>
             ))}
@@ -240,4 +289,4 @@ const Additem = () => {
   );
 };
 
-export default Additem;
+export default AddItem;
