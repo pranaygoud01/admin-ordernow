@@ -2,3 +2,10 @@
 *{
   font-family: "Inter Tight", sans-serif;
 }
+::-webkit-scrollbar{
+  width: 5px;
+}
+::-webkit-scrollbar-thumb
+{
+  background-color: black;
+}
