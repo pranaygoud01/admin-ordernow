@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CustomerOrder from "../components/CustomerOrder";
 import * as XLSX from 'xlsx';
 import toast from 'react-hot-toast';
-
+import audioFile from "../assets/audio.mp3"
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,20 +23,25 @@ const Orders = () => {
         });
         const data = await response.json();
         const sortedOrders = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setOrders(sortedOrders);
+    
+        setOrders(prevOrders => {
+          if (sortedOrders.length > prevOrders.length) {
+            const audio = new Audio(audioFile); // Use imported audio
+            audio.play();
+          }
+          return sortedOrders;
+        });
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
     };
   
-    fetchOrders(); // Fetch once immediately
+    fetchOrders(); // initial fetch
+    const interval = setInterval(fetchOrders, 10000); // every 10s
+    return () => clearInterval(interval); // cleanup
+  }, [authToken]);
   
-    const interval = setInterval(fetchOrders, 10000); // Then every 10 seconds
-  
-    return () => clearInterval(interval); // Cleanup interval on unmount
-  }, [authToken]); 
-  
-
+ console.log(orders)
   const downloadOrdersByDateRange = () => {
     if (!fromDate || !toDate) {
       toast.error("Please select both From Date and To Date.");
