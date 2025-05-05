@@ -13,6 +13,10 @@ const AddItem = () => {
   const [newCategory, setNewCategory] = useState("");
   const [categories, setCategories] = useState([]);
 
+  // Preparation choice state
+  const [newPrepChoice, setNewPrepChoice] = useState({ name: "", price: "" });
+  const [preparationChoices, setPreparationChoices] = useState([]);
+
   const authToken = localStorage.getItem('authToken');
 
   useEffect(() => {
@@ -73,6 +77,7 @@ const AddItem = () => {
       price,
       category,
       image: imageUrl,
+      preparationChoices, // Include preparation choices
     };
 
     try {
@@ -94,6 +99,7 @@ const AddItem = () => {
         setPrice("");
         setImageFile(null);
         setDescription("");
+        setPreparationChoices([]); // Reset preparation choices after successful submission
       } else {
         toast.error(data.message || "Failed to add item");
       }
@@ -158,6 +164,22 @@ const AddItem = () => {
     }
   };
 
+  // Add Preparation Choice
+  const handleAddPreparationChoice = () => {
+    if (!newPrepChoice.name || !newPrepChoice.price) {
+      toast.error("Preparation name and price are required");
+      return;
+    }
+
+    setPreparationChoices([...preparationChoices, newPrepChoice]);
+    setNewPrepChoice({ name: "", price: "" });
+  };
+
+  // Delete Preparation Choice
+  const handleDeletePreparationChoice = (index) => {
+    setPreparationChoices(preparationChoices.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="max-w-lg mx-auto p-6 mt-10 flex flex-col rounded-lg">
       <h2 className="text-2xl font-bold text-center mb-4">Add New Product</h2>
@@ -219,34 +241,62 @@ const AddItem = () => {
           </select>
         </div>
 
-        {/* Add/Delete Category Controls */}
-        <div className="mb-4 flex flex-col gap-2">
-          <div className="flex gap-2">
+        {/* Add Category */}
+        <div className="mb-4">
+          <label className="block font-semibold mb-2">Add New Category</label>
+          <div className="flex gap-2 mb-2">
             <input
               type="text"
-              placeholder="New category"
+              placeholder="New Category Name"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              className="flex-1 p-3 border border-gray-300 rounded-md"
+              className="w-full p-3 border border-gray-300 rounded-md"
             />
             <button
               type="button"
               onClick={handleAddCategory}
-              className="px-10 py-2 cursor-pointer font-semibold bg-green-600 text-white rounded-md"
+              className="px-6 py-3 font-semibold bg-blue-600 text-white rounded-md"
             >
               Add
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-            {categories.map((cat) => (
-              <div
-                key={cat._id}
-                className="flex items-center justify-between px-3 py-2 bg-white font-semibold border border-neutral-300 rounded"
-              >
-                <span className="text-sm truncate">{cat.name}</span>
+        </div>
+
+        {/* Preparation Choices */}
+        <div className="mb-4">
+          <label className="block font-semibold mb-2">Preparation Choices</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              placeholder="Preparation Name"
+              value={newPrepChoice.name}
+              onChange={(e) => setNewPrepChoice({ ...newPrepChoice, name: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-md"
+            />
+            <input
+              type="number"
+              placeholder="Price"
+              value={newPrepChoice.price}
+              onChange={(e) => setNewPrepChoice({ ...newPrepChoice, price: e.target.value })}
+              className="w-full p-3 border border-gray-300 rounded-md"
+            />
+            <button
+              type="button"
+              onClick={handleAddPreparationChoice}
+              className="px-6 py-3 font-semibold bg-green-600 text-white rounded-md"
+            >
+              Add
+            </button>
+          </div>
+
+          {/* List of Preparation Choices */}
+          <div>
+            {preparationChoices.map((choice, index) => (
+              <div key={index} className="flex items-center justify-between px-3 py-2 bg-white font-semibold border border-neutral-300 rounded mb-2">
+                <span>{choice.name} - ${choice.price}</span>
                 <button
                   type="button"
-                  onClick={() => handleDeleteCategory(cat._id, cat.name)}
+                  onClick={() => handleDeletePreparationChoice(index)}
                   className="text-red-600 text-xl cursor-pointer"
                 >
                   <MdOutlineDeleteOutline />
@@ -279,9 +329,8 @@ const AddItem = () => {
           <button
             type="submit"
             className="px-6 py-3 w-full rounded-md bg-rose-500 text-white font-semibold"
-            disabled={uploading}
           >
-            {uploading ? "Please wait..." : "Add Item"}
+            Add Item
           </button>
         </div>
       </form>
