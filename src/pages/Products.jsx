@@ -11,9 +11,17 @@ const Products = () => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-
+  const sBranch=localStorage.getItem('selectedBranch')
   const fetchProducts = () => {
-    fetch(`${import.meta.env.VITE_HOST}/api/items`)
+    fetch(`${import.meta.env.VITE_HOST}/api/items`,
+      
+        {
+          headers: {
+             "Content-Type": "application/json",
+             "branch":sBranch,
+           },}
+      
+    )
       .then((res) => res.json())
       .then((data) => {
         setProducts(data.items);
@@ -36,6 +44,7 @@ const Products = () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        "branch":sBranch
       },
     })
       .then((res) => {
@@ -76,6 +85,7 @@ const Products = () => {
       const response = await fetch(`${import.meta.env.VITE_HOST}/api/upload`, {
         method: "POST",
         body: form,
+        
       });
 
       const data = await response.json();
@@ -113,6 +123,7 @@ const Products = () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        "branch":sBranch
       },
       body: JSON.stringify({ ...formData, image: imageUrl }),
     })

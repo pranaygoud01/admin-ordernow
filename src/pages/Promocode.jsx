@@ -6,7 +6,7 @@ import { useEffect } from "react";
 const Promocode = () => {
   const [promocodes, setPromocodes] = useState([]);
   const authToken = localStorage.getItem('authToken');  // Replace with actual token or get it from context/localStorage
-
+  const branch=localStorage.getItem('selectedBranch')
   useEffect(() => {
     const fetchPromocodes = async () => {
       try {
@@ -15,6 +15,7 @@ const Promocode = () => {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${authToken}`,
+            "Branch":branch
           },
         });
 
@@ -58,6 +59,7 @@ const Promocode = () => {
           headers: {
             Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json",
+            "branch":branch
           },
         }
       );

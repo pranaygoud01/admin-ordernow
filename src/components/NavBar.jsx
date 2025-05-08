@@ -17,11 +17,11 @@ const NavBar = () => {
     localStorage.removeItem('authToken');
     navigate({ to: "/" });
   };
-
+ const branch=localStorage.getItem('selectedBranch')
   return (
     <div className='w-full p-5 sticky top-0 bg-white  z-50'>
       <div className='flex justify-between items-center'>
-        <h1 className='font-bold text-xl'>Admin Panel</h1>
+        <h1 className='font-bold text-xl'>{branch} Admin</h1>
 
         {/* Desktop Menu */}
         <div className='hidden lg:flex gap-4 text-sm font-semibold items-center text-neutral-800'>

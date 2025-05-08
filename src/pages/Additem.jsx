@@ -18,14 +18,19 @@ const AddItem = () => {
   const [preparationChoices, setPreparationChoices] = useState([]);
 
   const authToken = localStorage.getItem('authToken');
-
+  const sBranch =localStorage.getItem('selectedBranch')
   useEffect(() => {
     fetchCategories();
   }, []);
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_HOST}/api/categories`);
+      const response = await fetch(`${import.meta.env.VITE_HOST}/api/categories`,{
+       headers: {
+          "Content-Type": "application/json",
+          "branch":sBranch,
+        },}
+      );
       const data = await response.json();
       setCategories(data);
     } catch (error) {
@@ -86,6 +91,7 @@ const AddItem = () => {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
+          "branch":sBranch,
         },
         body: JSON.stringify(formData),
       });
@@ -121,6 +127,7 @@ const AddItem = () => {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
+          "branch":sBranch,
         },
         body: JSON.stringify({ name: trimmed }),
       });

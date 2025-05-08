@@ -11,14 +11,15 @@ const Orders = () => {
   const ordersPerPage = 4;
 
   const authToken = localStorage.getItem('authToken');
-
+  const branch=localStorage.getItem('selectedBranch');
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_HOST}/api/orders`, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${authToken}`
+            Authorization: `Bearer ${authToken}`,
+            "Branch":branch,
           }
         });
         const data = await response.json();
