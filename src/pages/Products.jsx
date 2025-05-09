@@ -7,21 +7,20 @@ const Products = () => {
     name: "",
     description: "",
     price: "",
-    image: "", // store the image url
+    image: "",
+    preparationChoices: [],
   });
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const sBranch=localStorage.getItem('selectedBranch')
+  const sBranch = localStorage.getItem("selectedBranch");
+
   const fetchProducts = () => {
-    fetch(`${import.meta.env.VITE_HOST}/api/items`,
-      
-        {
-          headers: {
-             "Content-Type": "application/json",
-             "branch":sBranch,
-           },}
-      
-    )
+    fetch(`${import.meta.env.VITE_HOST}/api/items`, {
+      headers: {
+        "Content-Type": "application/json",
+        branch: sBranch,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         setProducts(data.items);
@@ -44,7 +43,7 @@ const Products = () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        "branch":sBranch
+        branch: sBranch,
       },
     })
       .then((res) => {
@@ -68,14 +67,13 @@ const Products = () => {
       description: product.description,
       price: product.price,
       image: product.image,
+      preparationChoices: product.preparationChoices || [],
     });
-    setImageFile(null); // reset image file
+    setImageFile(null);
   };
 
   const handleImageUpload = async () => {
-    if (!imageFile) {
-      return null;
-    }
+    if (!imageFile) return null;
 
     const form = new FormData();
     form.append("image", imageFile);
@@ -85,18 +83,12 @@ const Products = () => {
       const response = await fetch(`${import.meta.env.VITE_HOST}/api/upload`, {
         method: "POST",
         body: form,
-        
       });
 
       const data = await response.json();
       setUploading(false);
 
-      if (response.ok) {
-        return data.url;
-      } else {
-        console.error(data.message || "Image upload failed");
-        return null;
-      }
+      return response.ok ? data.url : null;
     } catch (error) {
       setUploading(false);
       console.error("Image upload failed");
@@ -107,15 +99,13 @@ const Products = () => {
   const handleUpdate = async () => {
     let imageUrl = formData.image;
 
-    // If new image selected, upload it first
     if (imageFile) {
       const uploadedUrl = await handleImageUpload();
-      if (uploadedUrl) {
-        imageUrl = uploadedUrl;
-      } else {
+      if (!uploadedUrl) {
         console.error("Failed to upload image");
         return;
       }
+      imageUrl = uploadedUrl;
     }
 
     fetch(`${import.meta.env.VITE_HOST}/api/items/update/${editingProduct._id}`, {
@@ -123,14 +113,12 @@ const Products = () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        "branch":sBranch
+        branch: sBranch,
       },
       body: JSON.stringify({ ...formData, image: imageUrl }),
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to update product");
-        }
+        if (!res.ok) throw new Error("Failed to update product");
         return res.json();
       })
       .then(() => {
@@ -179,88 +167,135 @@ const Products = () => {
         ))}
       </div>
 
-      {/* Edit Modal */}
       {editingProduct && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/30 px-3 backdrop-blur-sm z-50">
-    <div className="bg-white rounded-2xl shadow-lg p-8 w-[400px] relative">
-      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Edit Product</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 px-3 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-2xl shadow-lg p-8 w-[400px] relative">
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Edit Product</h2>
 
-      {/* Form */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">Name</label>
-          <input
-            type="text"
-            placeholder="Enter product name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full border border-neutral-300 rounded-lg p-2 text-gray-700 focus:ring-2 focus:ring-blue-400 outline-none"
-          />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter product name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full border border-neutral-300 rounded-lg p-2 text-gray-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Description</label>
+                <textarea
+                  placeholder="Enter product description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full border border-neutral-300 rounded-lg p-2 text-gray-700"
+                  rows="3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Price (£)</label>
+                <input
+                  type="number"
+                  placeholder="Enter product price"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className="w-full border border-neutral-300 rounded-lg p-2 text-gray-700"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files[0])}
+                  className="w-full"
+                />
+                {(imageFile || formData.image) && (
+                  <img
+                    src={imageFile ? URL.createObjectURL(imageFile) : formData.image}
+                    alt="Preview"
+                    className="mt-3 w-full h-40 border-neutral-300 object-cover rounded-md border"
+                  />
+                )}
+              </div>
+
+              {/* Preparation Choices */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Preparation Choices</label>
+                {formData.preparationChoices.map((choice, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="Name"
+                      value={choice.name}
+                      onChange={(e) => {
+                        const updated = [...formData.preparationChoices];
+                        updated[index].name = e.target.value;
+                        setFormData({ ...formData, preparationChoices: updated });
+                      }}
+                      className="flex-1 border border-neutral-300 rounded-lg p-2"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      value={choice.price}
+                      onChange={(e) => {
+                        const updated = [...formData.preparationChoices];
+                        updated[index].price = Number(e.target.value);
+                        setFormData({ ...formData, preparationChoices: updated });
+                      }}
+                      className="w-24 border border-neutral-300 rounded-lg p-2"
+                    />
+                    <button
+                      onClick={() => {
+                        const updated = formData.preparationChoices.filter((_, i) => i !== index);
+                        setFormData({ ...formData, preparationChoices: updated });
+                      }}
+                      className="text-red-500 hover:text-red-700 font-bold text-lg"
+                      title="Remove"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      preparationChoices: [...formData.preparationChoices, { name: "", price: 0 }],
+                    })
+                  }
+                  className="text-blue-500 mt-2 hover:underline"
+                >
+                  + Add Preparation Choice
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setEditingProduct(null)}
+                className="px-4 py-2 rounded-lg font-semibold bg-gray-300 hover:bg-gray-200 text-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                disabled={uploading}
+                className={`px-4 py-2 rounded-lg font-semibold text-white ${
+                  uploading ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                }`}
+              >
+                {uploading ? "Updating..." : "Update"}
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">Description</label>
-          <textarea
-            placeholder="Enter product description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full border border-neutral-300 rounded-lg p-2 text-gray-700 focus:ring-2 focus:ring-blue-400 outline-none"
-            rows="3"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">Price (£)</label>
-          <input
-            type="number"
-            placeholder="Enter product price"
-            value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-            className="w-full border border-neutral-300 rounded-lg p-2 text-gray-700 focus:ring-2 focus:ring-blue-400 outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-semibold mb-1">Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files[0])}
-            className="w-full"
-          />
-          {/* Show image preview */}
-          {(imageFile || formData.image) && (
-            <img
-              src={imageFile ? URL.createObjectURL(imageFile) : formData.image}
-              alt="Preview"
-              className="mt-3 w-full h-40 border-neutral-300 object-cover rounded-md border"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Buttons */}
-      <div className="flex justify-end gap-3 mt-6">
-        <button
-          onClick={() => setEditingProduct(null)}
-          className="px-4 py-2 rounded-lg font-semibold bg-gray-300 hover:bg-gray-200 cursor-pointer text-gray-700 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleUpdate}
-          disabled={uploading}
-          className={`px-4 py-2 rounded-lg font-semibold text-white cursor-pointer transition ${
-            uploading ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-          }`}
-        >
-          {uploading ? "Updating..." : "Update"}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+      )}
     </div>
   );
 };
